@@ -1,5 +1,5 @@
 15
-ADD user u1 1.0 Adam D'Angelo
+ADD user u1 1.0 Adam D’Angelo
 ADD user u2 1.0 Adam Black
 ADD topic t1 0.8 Adam D’Angelo
 ADD question q1 0.5 What does Adam D’Angelo do at Quora?
