@@ -9,9 +9,9 @@ class Item(object):
         self.words = words
 
 class Node(object):
-    def __init__(self, children=None, item_ids=None):
+    def __init__(self, children=None, items=None):
         self.children = {}
-        self.item_ids = set()
+        self.items = set()
 
     def add(self, item, trie):
 
@@ -26,20 +26,35 @@ class Node(object):
                     # print "CREATING NEW NODE"
                     new_node = Node()
                     current_node.children[letter] = new_node
-                    new_node.item_ids.add(item.id)
+                    new_node.items.add(item.id)
                     current_node = new_node
                     # print "current_node.children", current_node.children
-                    # print "current_node.item_ids", current_node.item_ids
+                    # print "current_node.items", current_node.items
                 else:
                     # print "NO NEW NODE, KEEP TRAVERSING"
                     current_node = current_node.children[letter]
-                    current_node.item_ids.add(item.id)
+                    current_node.items.add(item.id)
                     # print "current_node.children", current_node.children
-                    # print "current_node.item_ids", current_node.item_ids
+                    # print "current_node.items", current_node.items
 
-    def delete(self, item_id, trie):
-        current_node = trie        
+    def delete(self, item, trie):
 
+        current_node = None   # pointer
+
+        for word in item.words:
+            lower_word = word.lower()
+            clean_word = unidecode(lower_word.decode('utf8'))
+            print clean_word
+            current_node = trie
+            for letter in clean_word:  #[adam, black]
+                if letter not in current_node.children:
+                    print "Error: Invalid Item Id"
+                else:
+                    current_node = current_node.children[letter]
+                    print "BEFORE: current_node.items", current_node.items
+                    current_node.items.discard(item.id)  # delete item from set
+                    print "AFTER: current_node.items", current_node.items
+                    print "CHILDREN:", current_node.children
 
 class TypeAhead(object):
     def add(self, item, trie, total_items):
@@ -47,11 +62,14 @@ class TypeAhead(object):
         trie.add(item, trie)
         print "TOTAL ITEMS:", total_items
         print "FIRST LEVEL:", trie.children
-        print "FIRST LEVEL ITEMS:", trie.item_ids
+        print "FIRST LEVEL ITEMS:", trie.items
 
     def delete(self, item_id, trie, total_items):
-        total_items.pop(item_id, None)  # remove from total_items dictionary
-        trie.delete(item_id, trie)
+        item = total_items.pop(item_id, None)  # remove from total_items dictionary
+        trie.delete(item, trie)
+        print "TOTAL ITEMS:", total_items
+        print "FIRST LEVEL:", trie.children
+        print "FIRST LEVEL ITEMS:", trie.items
 
     # def query(self, res_num, query):
 
