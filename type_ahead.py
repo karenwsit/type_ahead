@@ -1,5 +1,6 @@
 import sys
 from unidecode import unidecode
+from operator import attrgetter
 
 class Item(object):
     def __init__(self, item_type, item_id, creation_id, score, words):
@@ -28,14 +29,14 @@ class Node(object):
                     # print "CREATING NEW NODE"
                     new_node = Node()
                     current_node.children[letter] = new_node
-                    new_node.items.add(item.id)
+                    new_node.items.add(item)
                     current_node = new_node
                     # print "current_node.children", current_node.children
                     # print "current_node.items", current_node.items
                 else:
                     # print "NO NEW NODE, KEEP TRAVERSING"
                     current_node = current_node.children[letter]
-                    current_node.items.add(item.id)
+                    current_node.items.add(item)
                     # print "current_node.children", current_node.children
                     # print "current_node.items", current_node.items
 
@@ -57,22 +58,19 @@ class Node(object):
                     print "AFTER: current_node.items", current_node.items
                     print "CHILDREN:", current_node.children
 
-    def query(self, query_list, trie):
+    def query(self, query_word, trie):
         current_node = None  # pointer
 
-        if query_list:
-            for word in query_list:
-                clean_word = unidecode(word.decode('utf8'))
-                current_node = trie
-                for letter in clean_word:
-                    if letter in current_node.children:
-                        current_node = current_node.children[letter]
-                    else:
-                        return None
-                query_ids = current_node.items.copy()  # should return the last node with all the items that each word matches
-            return query_ids
-        else:
-            return None
+        clean_word = unidecode(query_word.decode('utf8'))
+        current_node = trie
+
+        for letter in clean_word:
+            if letter in current_node.children:
+                current_node = current_node.children[letter]
+            else:
+                return None
+        query_items = current_node.items.copy()  # should return the last node with all the items that each word matches
+        return query_items
 
 class TypeAhead(object):
 
@@ -93,12 +91,23 @@ class TypeAhead(object):
         if item is None:
             print 'Error: Invalid Item ID'
 
-    def query(self, res_num, trie, query_list):
-        query_ids = trie.query(query_list[:1], trie)
-        if query_ids and len(query_list) > 1:
-            query_ids &= trie.query(query_list[1:], trie)  # &= set intersection update
+    def query(self, res_num, trie, total_items, query_list):
+        query_items = trie.query(query_list[0], trie)
+        if query_items != None:
+            for i in range(1, len(query_list)):
+                new_query_items = trie.query(query_list[i], trie)
+                if new_query_items != None:
+                    query_items &= new_query_items  # &= set intersection update
+                else:  #no match
+                    query_items = None
 
-        print "QUERY IDS:", query_ids
+        if query_items == None or res_num == 0:
+            print ""
+        else:
+            # print "QUERY_ITEMS:", query_items
+            sorted_query_items = sorted(query_items, key=attrgetter('score', 'creation_id'), reverse=True)
+            # print "SORTED_QUERY_ITEMS:", sorted_query_items
+            print " ".join([item.id for item in sorted_query_items[:res_num]])
 
     # def wquery(self, res_num, boost_num, ):
 
@@ -123,7 +132,7 @@ def read_stdin():
             type_ahead.delete(line[1], trie, total_items)
 
         if line[0] == 'QUERY':
-            type_ahead.query(int(line[1]), trie, [word.lower() for word in line[2:]])
+            type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[2:]])
 
         # if line[0] == 'WQUERY':
         #     for word in line:
