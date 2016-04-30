@@ -5,7 +5,7 @@ import re
 
 class Item(object):
     """
-    Item object initializes with 5 attributes: type, id, creation_id for keeping track of oldest to newest items, score, and words.
+    Item object initializes with 5 attributes: item_type, item_id, creation_id for keeping track of oldest to newest items, score, and words.
     Item object has 1 method: boost_score.
     """
     def __init__(self, item_type=None, item_id=None, creation_id=None, score=None, words=None):
@@ -78,7 +78,7 @@ class Node(object):
     def query(self, query_word, trie):
         """
         This method takes in a query word and the trie (root node of the trie).
-        It traveres the trie to match the nodes of the item's word.
+        It traverses the trie to match the nodes of the item's word.
         """
         current_node = None  # pointer
 
@@ -101,7 +101,7 @@ class TypeAhead(object):
     def add(self, item, trie, total_items):
         """
         This method takes in an item, trie (root node of the trie), and total_items.
-        It modifies adds item.id and item to total_items and calls the trie's add method.
+        It adds item.id and item to total_items and calls the trie's add method.
         """
         total_items[item.id] = item
         trie.add(item, trie)
@@ -156,7 +156,7 @@ def validate(line):
             print "Invalid Item Type"
             return False
 
-        id_match = re.search('^[\w]+$', line[2]) # test to see if the item id is an alphanumeric string
+        id_match = re.search('^[\w]+$', line[2])  # test to see if the item id is an alphanumeric string
         if not id_match:
             print "Invalid Item ID"
             return False
@@ -196,7 +196,7 @@ def main():
     type_ahead = TypeAhead()
     creation_id = 1
 
-    #returns an iterator object; if value called == sentinel, StopIteration will be raised; ignores the first command int line
+    #returns an iterator object; if value called == sentinel, StopIteration will be raised; ignores the first command integer line
     for raw_line in iter(sys.stdin.readline, ""):
         line = raw_line.strip().split()
 
