@@ -117,9 +117,9 @@ class TypeAhead(object):
         if item is None:
             print 'Error: Invalid Item ID'
 
-    def query(self, res_num, trie, total_items, query_list, boost_list=None):
+    def query(self, res_num, trie, query_list, boost_list=None):
         """
-        This method takes in res_num, trie (root node of the trie), total_items, query_list, and boost_list if present.
+        This method takes in res_num, trie (root node of the trie), query_list, and boost_list if present.
         It traverses the trie to match the nodes of the item's words and prints the res_num of results in descending score order.
         If boost_list is present, the score is modified by calling item.boost_score first and then printing the results.
         """
@@ -142,7 +142,7 @@ class TypeAhead(object):
             print " ".join([item.id for item in sorted_query_items[:res_num]])
 
 def validate(line):
-    """This function tests if line inputs are valid."""
+    """This function tests if line inputs are valid and returns a boolean."""
 
     VALID_COMMANDS = ['ADD', 'DEL', 'QUERY', 'WQUERY']
 
@@ -210,11 +210,11 @@ def main():
                 type_ahead.delete(line[1], trie, total_items)
 
             if line[0] == 'QUERY':
-                type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[2:]])
+                type_ahead.query(int(line[1]), trie, [word.lower() for word in line[2:]])
 
             if line[0] == 'WQUERY':
                 num_boosts = int(line[2])
-                type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[3+num_boosts:]], [boost.split(':') for boost in line[3:3+num_boosts]])
+                type_ahead.query(int(line[1]), trie, [word.lower() for word in line[3+num_boosts:]], [boost.split(':') for boost in line[3:3+num_boosts]])
 
 if __name__ == '__main__':
     main()
