@@ -107,6 +107,7 @@ class TypeAhead(object):
             print 'Error: Invalid Item ID'
 
     def query(self, res_num, trie, total_items, query_list, boost_list=None):
+        print 'HI! IM RUNNING!'
         query_items = trie.query(query_list[0], trie)
         if query_items is not None:
             for i in range(1, len(query_list)):
@@ -132,10 +133,8 @@ class TypeAhead(object):
             # print "SORTED_QUERY_ITEMS:", sorted_query_items
             print " ".join([item.id for item in sorted_query_items[:res_num]])
 
-# "^[a-zA-Z0-9]+$"
-
 def validate(line):
-    print 'line', line
+    "IM VALIDATING"
     VALID_COMMANDS = ['ADD', 'DEL', 'QUERY', 'WQUERY']
 
     if line[0] not in VALID_COMMANDS:
@@ -145,6 +144,7 @@ def validate(line):
     if line[0] == 'ADD':
         VALID_ITEM_TYPES = ['user', 'topic', 'question', 'board']
         if line[1] not in VALID_ITEM_TYPES:
+            print "line[1]:", line[1]
             print "Invalid Item Type"
             return False
 
@@ -154,7 +154,7 @@ def validate(line):
             print "Invalid Item ID"
             return False
 
-        score_match = re.search("^[0-9]+$", line[3])
+        score_match = re.search("^[0-9.]+$", line[3])
         #test to see item score contains digits
         if not score_match:
             print "Invalid Item Score"
@@ -167,13 +167,30 @@ def validate(line):
             print "Invalid Item ID"
             return False
 
-    # if line[0] == 'QUERY':
+    if line[0] == 'QUERY':
+        results_num = re.search("^[0-9]+$", line[1])
+        print results_num
+        #test to see results_num contains digits
+        if results_num is None:
+            print "Invalid Number of Results"
+            return False
 
-    # if line[0] == 'WQUERY':
+    if line[0] == 'WQUERY':
+        print type(line[1])
+        results_num = re.search("^[0-9]+$", line[1])
+        print "results_num", results_num
+        #test to see results_num contains digits
+        if results_num is None:
+            print "Invalid Number of Results"
+            return False
 
-    # else:
-        return True
-
+        boosts_num = re.search("^[0-9]+$", line[2])
+        #test to see num_boosts contains digits
+        if boosts_num is None:
+            print "Invalid Number of Boosts"
+            return False
+    print 'TRUE'
+    return True
 
 def main():
     trie = Node()    # root of the trie
@@ -184,23 +201,23 @@ def main():
     #returns an iterator object; if value called == sentinel, StopIteration will be raised; ignores the first command, the int
     for raw_line in iter(sys.stdin.readline, ""):
         line = raw_line.strip().split()
+        print "LINE:", line
 
-        print validate(line)
-        # if validate(line):
-            # if line[0] == 'ADD':
-            #     creation_id += 1
-            #     item = Item(line[1], line[2], creation_id, float(line[3]), [word.lower() for word in line[4:]])
-            #     type_ahead.add(item, trie, total_items)
+        if validate(line):
+            if line[0] == 'ADD':
+                creation_id += 1
+                item = Item(line[1], line[2], creation_id, float(line[3]), [word.lower() for word in line[4:]])
+                type_ahead.add(item, trie, total_items)
 
-            # if line[0] == 'DEL':
-            #     type_ahead.delete(line[1], trie, total_items)
+            if line[0] == 'DEL':
+                type_ahead.delete(line[1], trie, total_items)
 
-            # if line[0] == 'QUERY':
-            #     type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[2:]])
+            if line[0] == 'QUERY':
+                type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[2:]])
 
-            # if line[0] == 'WQUERY':
-            #     num_boosts = int(line[2])
-            #     type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[3+num_boosts:]], [boost.split(':') for boost in line[3:3+num_boosts]])
+            if line[0] == 'WQUERY':
+                num_boosts = int(line[2])
+                type_ahead.query(int(line[1]), trie, total_items, [word.lower() for word in line[3+num_boosts:]], [boost.split(':') for boost in line[3:3+num_boosts]])
 
 if __name__ == '__main__':
     main()
