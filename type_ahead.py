@@ -38,7 +38,7 @@ class Node(object):
     def add(self, item, trie):
         """
         This method takes in an item and the trie (root node of the trie).
-        It modifies the trie by creating and adding nodes from the item's words to the trie
+        It modifies the trie by creating and adding nodes from the item's words to the trie.
         """
         current_node = None  # pointer
 
@@ -121,7 +121,7 @@ class TypeAhead(object):
         """
         This method takes in res_num, trie (root node of the trie), total_items, query_list, and boost_list if present.
         It traverses the trie to match the nodes of the item's words and prints the res_num of results in descending score order.
-        If boost_list is present, the score is modified by calling item.boost_score first and then printing the results 
+        If boost_list is present, the score is modified by calling item.boost_score first and then printing the results.
         """
         query_items = trie.query(query_list[0], trie)
         if query_items is not None:
@@ -196,7 +196,7 @@ def main():
     type_ahead = TypeAhead()
     creation_id = 1
 
-    #returns an iterator object; if value called == sentinel, StopIteration will be raised; ignores the first command, the int
+    #returns an iterator object; if value called == sentinel, StopIteration will be raised; ignores the first command int line
     for raw_line in iter(sys.stdin.readline, ""):
         line = raw_line.strip().split()
 
