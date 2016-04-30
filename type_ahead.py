@@ -5,9 +5,10 @@ import re
 
 class Item(object):
     """
-    Item class that methods - write in inputs & outputs & if it modifies any of the attributes
+    Item object initializes with 5 attributes: type, id, creation_id for keeping track of oldest to newest items, score, and words.
+    Item object has 1 method: boost_score.
     """
-    def __init__(self, item_type, item_id, creation_id, score, words):
+    def __init__(self, item_type=None, item_id=None, creation_id=None, score=None, words=None):
         self.type = item_type
         self.id = item_id
         self.creation_id = creation_id
@@ -16,6 +17,7 @@ class Item(object):
 
 
     def boost_score(self, boost_list):
+        """This method modifies the score attribute of the item object."""
         score = self.score
         for boost in boost_list:
             if self.type == boost[0] or self.id == boost[0]:
@@ -25,7 +27,8 @@ class Item(object):
 
 class Node(object):
     """
-    Comments!
+    Node object initializes with 2 attributes: a children dictionary and items set.
+    Node object has 3 methods: add, delete, query.
     """
     def __init__(self, children=None, items=None):
         self.children = {}
@@ -33,6 +36,10 @@ class Node(object):
 
 
     def add(self, item, trie):
+        """
+        This method takes in an item and the trie (root node of the trie).
+        It modifies the trie by creating and adding nodes from the item's words to the trie
+        """
         current_node = None  # pointer
 
         for word in item.words:
@@ -50,6 +57,10 @@ class Node(object):
 
 
     def delete(self, item, trie):
+        """
+        This method takes in an item and the trie (root node of the trie).
+        It modifies the trie by deleting nodes of the item's words.
+        """
         current_node = None   # pointer
 
         for word in item.words:
@@ -65,6 +76,10 @@ class Node(object):
 
 
     def query(self, query_word, trie):
+        """
+        This method takes in a query word and the trie (root node of the trie).
+        It traveres the trie to match the nodes of the item's word.
+        """
         current_node = None  # pointer
 
         clean_word = unidecode(query_word.decode('utf8'))
@@ -80,20 +95,34 @@ class Node(object):
 
 class TypeAhead(object):
     """
-    Comments
+    TypeAhead object initializes with no attributes.
+    TypeAhead object has 3 methods: add, delete, query.
     """
     def add(self, item, trie, total_items):
+        """
+        This method takes in an item, trie (root node of the trie), and total_items.
+        It modifies adds item.id and item to total_items and calls the trie's add method.
+        """
         total_items[item.id] = item
         trie.add(item, trie)
 
     def delete(self, item_id, trie, total_items):
-        item = total_items.pop(item_id, None)  # remove from total_items dictionary
+        """
+        This method takes in an item_id, trie (root node of the trie), and total_items.
+        It removes item.id and item from total_items and calls the trie's delete method if item is present.
+        """
+        item = total_items.pop(item_id, None)
         if item:
             trie.delete(item, trie)
         if item is None:
             print 'Error: Invalid Item ID'
 
     def query(self, res_num, trie, total_items, query_list, boost_list=None):
+        """
+        This method takes in res_num, trie (root node of the trie), total_items, query_list, and boost_list if present.
+        It traverses the trie to match the nodes of the item's words and prints the res_num of results in descending score order.
+        If boost_list is present, the score is modified by calling item.boost_score first and then printing the results 
+        """
         query_items = trie.query(query_list[0], trie)
         if query_items is not None:
             for i in range(1, len(query_list)):
@@ -103,16 +132,18 @@ class TypeAhead(object):
                 else:
                     query_items = None  # there is no match, so set query_items = None
 
-        if query_items is None or res_num == 0:
+        if query_items is None or res_num == 0:  # there is no match or res_num to return is 0
             print ""
         elif boost_list is not None:  # if there are boosts, call item.boost_score
             boosts_sorted_query_items = sorted(query_items, key=lambda item: (item.boost_score(boost_list), item.creation_id), reverse=True)
             print " ".join([item.id for item in boosts_sorted_query_items[:res_num]])
-        else:
+        else:  # there are no boosts, return original score of matched items
             sorted_query_items = sorted(query_items, key=attrgetter('score', 'creation_id'), reverse=True)
             print " ".join([item.id for item in sorted_query_items[:res_num]])
 
 def validate(line):
+    """This function tests if line inputs are valid."""
+
     VALID_COMMANDS = ['ADD', 'DEL', 'QUERY', 'WQUERY']
 
     if line[0] not in VALID_COMMANDS:
