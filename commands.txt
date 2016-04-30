@@ -14,3 +14,5 @@ WQUERY 10 0 Adam D’A --> u1 t1 q2 q1
 WQUERY 2 1 topic:9.99 Adam D’A --> t1 u1
 DEL u2
 QUERY 2 Adam --> u1 t1
+
+ADD topic 33 1.0 Adam D'Angelo
